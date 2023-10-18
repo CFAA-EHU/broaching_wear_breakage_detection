@@ -1,0 +1,49 @@
+/* Estilos para el formulario de parámetros */
+.form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 10px;
+    background-color: #FFFFFF;
+    text-align: center;
+}
+
+.form-container h1 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #085FBB;
+}
+
+.form-container p {
+    font-size: 16px;
+    color: #333;
+}
+
+.form-container div {
+    margin: 10px 0;
+}
+
+.form-container label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.form-container input {
+    padding: 5px;
+    border: 1px solid #03122A;
+}
+
+.form-container button {
+    background-color: #085FBB;
+    color: #FFFFFF;
+    padding: 10px 20px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Estilo para el mensaje */
+#mensaje {
+    color: #333;
+    font-size: 16px;
+    margin-top: 10px;
+}

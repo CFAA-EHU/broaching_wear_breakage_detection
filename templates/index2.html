@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brochado</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <!-- Custom styles for this template -->
+    <link href="static/estilos.css" rel="stylesheet">
+</head>
+<body>
+    <h1>BROACHING ANALYSIS</h1>
+
+
+    <div id="numero de brochado">
+        <h2>Broaching stroke: {{ diente }}</h2>
+    </div>
+
+    <div class="table-container">
+        <table class="minimalistBlack">
+            <thead>
+                <tr>
+                <th>Metric</th>
+                <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Max</td>
+                <td>{{ maximo }}</td>
+            </tr>
+            <tr>
+                <td>Min</td>
+                <td>{{ minimo }}</td>
+            </tr>
+            <tr>
+                <td>Average</td>
+                <td>{{ media }}</td>
+            </tr>
+            <tr>
+                <td>Amplitude</td>
+                <td>{{ rango }}</td>
+            </tr>
+            <tr>
+                <td>Stand. Dev.</td>
+                <td>{{ desv }}</td>
+            </tr>
+            <tr>
+                <td>IQR (Q3-Q1)</td>
+                <td>{{ IQ }}</td>
+            </tr>
+            </tbody>
+        </table>
+
+
+
+        <table class="minimalistGreen">
+            <thead>
+                <tr>
+                    <th colspan="2">Test Data</th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Teeth Number</td>
+                <td id="tn"></td>
+            </tr>
+            <tr>
+                <td>First Tooth Position</td>
+                <td id="ftp"></td>
+            </tr>
+            <tr>
+                <td>Step</td>
+                <td id="step"></td>
+            </tr>
+            <tr>
+                <td>Disk Width</td>
+                <td id="dw"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="spacer"></div>
+
+
+    <div class="image-container">
+    <div class="image">
+        <img src="{{ url_for('static', filename='TorqueCompleto_UTK68.png') }}" alt="Mi Imagen">
+    </div>
+    <div class="image">
+        <img src="{{ url_for('static', filename='ViolinUTK68.png') }}" alt="Mi Imagen 2">
+    </div>
+    </div>
+
+
+
+    <script>
+    // Obtener los datos del localStorage
+    var texto1 = localStorage.getItem("texto1");
+    var texto2 = localStorage.getItem("texto2");
+    var texto3 = localStorage.getItem("texto3");
+    var texto4 = localStorage.getItem("texto4");
+
+    // Actualizar los elementos de texto con los datos recuperados
+    document.getElementById("tn").textContent = texto1;
+    document.getElementById("ftp").textContent = texto2;
+    document.getElementById("step").textContent = texto3;
+    document.getElementById("dw").textContent = texto4;
+    </script>
+
+    <script>
+        // Función para verificar nuevos archivos
+        function verificarNuevosArchivosSegundo() {
+            $.ajax({
+                url: '/verificar_nuevos_archivos_segundo', // Ruta en Flask para verificar nuevos archivos
+                type: 'GET',
+                success: function (data) {
+                    if (data.nuevo_archivo_segundo) {
+                        // Si se detecta un nuevo archivo, redirigir a la página de análisis
+                        window.location.href = "/analisis_brochado";
+                    }
+                },
+                complete: function () {
+                    // Realizar la verificación periódicamente cada 1 segundo
+                    setTimeout(verificarNuevosArchivosSegundo, 2000);
+                }
+            });
+        }
+
+        // Iniciar la verificación de nuevos archivos al cargar la página
+        verificarNuevosArchivosSegundo();
+    </script>
+
+
+
+</body>
+</html>

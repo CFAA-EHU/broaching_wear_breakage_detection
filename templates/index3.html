@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<!-- Bootstrap core CSS -->
+<link href="https://getbootstrap.com/docs/4.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+<!-- Custom styles for this template -->
+<!-- <link href="gui/template.css" rel="stylesheet"> -->
+<link href="static/estilosIndex.css" rel="stylesheet">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broaching parameters</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+
+    <div class="form-container">
+    <h1>Broaching parameters</h1>
+    <p>Please enter the following parameters</p>
+
+    <div>
+        <label for="var1">Teeth Number:</label>
+        <input type="text" id="var1" name="var1" placeholder="Escribe algo...">
+    </div>
+
+    <div>
+        <label for="var2">First Tooth Position (mm):</label>
+        <input type="text" id="var2" name="var2" placeholder="Escribe algo...">
+    </div>
+
+    <div>
+        <label for="var3">Step (mm):</label>
+        <input type="text" id="var3" name="var3" placeholder="Escribe algo...">
+    </div>
+
+    <div>
+        <label for="var4">Disk Width (mm):</label>
+        <input type="text" id="var4" name="var4" placeholder="Escribe algo...">
+    </div>
+
+    <button type="button" id="boton" disabled>Guardar</button>
+
+    <div id="mensaje"></div>
+    </div>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="https://getbootstrap.com/docs/4.0/assets/js/vendor/popper.min.js"></script>
+    <script src="https://getbootstrap.com/docs/4.0/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        // Función para habilitar o deshabilitar el botón de guardar según las condiciones
+        function habilitarBotonGuardar() {
+            var var1Input = document.getElementById("var1");
+            var var2Input = document.getElementById("var2");
+            var var3Input = document.getElementById("var3");
+            var var4Input = document.getElementById("var4");
+
+            var botonGuardar = document.getElementById("boton");
+
+            if (var1Input.value !== "" && var2Input.value !== "" && var3Input.value !== "" && var4Input.value !== "") {
+                botonGuardar.disabled = false;
+            } else {
+                botonGuardar.disabled = true;
+            }
+        }
+
+        // Llama a la función habilitarBotonGuardar cuando se hace clic en el botón
+        document.getElementById("boton").addEventListener("click", function () {
+            // Obtener los valores de las cajas de texto
+            var valorTexto1 = document.getElementById("var1").value;
+            var valorTexto2 = document.getElementById("var2").value;
+            var valorTexto3 = document.getElementById("var3").value;
+            var valorTexto4 = document.getElementById("var4").value;
+
+            // Enviar los valores al servidor Flask (puedes usar AJAX para esto)
+            fetch("/guardar_datos", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    texto1: valorTexto1,
+                    texto2: valorTexto2,
+                    texto3: valorTexto3,
+                    texto4: valorTexto4
+                })
+            })
+                .then(response => {
+                    // Manejar la respuesta del servidor
+                    if (response.ok) {
+                        localStorage.setItem("texto1", valorTexto1);
+                        localStorage.setItem("texto2", valorTexto2);
+                        localStorage.setItem("texto3", valorTexto3);
+                        localStorage.setItem("texto4", valorTexto4);
+                        // Mostrar el mensaje en el div de mensaje
+                        document.getElementById("mensaje").textContent = "Datos guardados con éxito";
+                    } else {
+                        console.error("Error al guardar los datos");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error de red:", error);
+                });
+        });
+
+        // Agregar eventos 'input' a las cajas de texto
+        document.getElementById("var1").addEventListener("input", habilitarBotonGuardar);
+        document.getElementById("var2").addEventListener("input", habilitarBotonGuardar);
+        document.getElementById("var3").addEventListener("input", habilitarBotonGuardar);
+        document.getElementById("var4").addEventListener("input", habilitarBotonGuardar);
+    </script>
+
+    <script>
+        // Función para verificar nuevos archivos
+        function verificarNuevosArchivos() {
+            $.ajax({
+                url: '/verificar_nuevos_archivos', // Ruta en Flask para verificar nuevos archivos
+                type: 'GET',
+                success: function (data) {
+                    if (data.nuevo_archivo) {
+                        // Si se detecta un nuevo archivo, redirigir a la página de análisis
+                        window.location.href = "/analisis_brochado";
+                    }
+                },
+                complete: function () {
+                    // Realizar la verificación periódicamente cada 2 segundos
+                    setTimeout(verificarNuevosArchivos, 2000);
+                }
+            });
+        }
+
+        // Iniciar la verificación de nuevos archivos al cargar la página
+        verificarNuevosArchivos();
+    </script>
+</body>
+</html>
