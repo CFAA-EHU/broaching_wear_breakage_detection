@@ -78,6 +78,10 @@
                 <td>Disk Width</td>
                 <td id="dw"></td>
             </tr>
+            <tr>
+                <td>Material</td>
+                <td id="mat"></td>
+            </tr>
             </tbody>
         </table>
     </div>
@@ -102,12 +106,14 @@
     var texto2 = localStorage.getItem("texto2");
     var texto3 = localStorage.getItem("texto3");
     var texto4 = localStorage.getItem("texto4");
+    var texto5 = localStorage.getItem("texto5");
 
     // Actualizar los elementos de texto con los datos recuperados
     document.getElementById("tn").textContent = texto1;
     document.getElementById("ftp").textContent = texto2;
     document.getElementById("step").textContent = texto3;
     document.getElementById("dw").textContent = texto4;
+    document.getElementById("mat").textContent = texto5;
     </script>
 
     <script>
