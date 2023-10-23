@@ -22,12 +22,13 @@ app = Flask(__name__)
 #first_tooth_position = 915
 #step = 10
 #Disk_Width = 40
-material = 'IN718'
+
 
 teeth_number = 0
 first_tooth_position = 0
 step = 0
 Disk_Width = 0
+material = 'IN718'
 
 Rotura = []  # lista donde almaceno las pasadas con rotura
 PosRot_Lista = []
@@ -412,6 +413,7 @@ def guardar_datos():
     global first_tooth_position
     global step
     global Disk_Width
+    global material
     global zBI
     global zEI
     global zES
@@ -423,6 +425,7 @@ def guardar_datos():
     first_tooth_position = data.get('texto2')
     step = data.get('texto3')
     Disk_Width = data.get('texto4')
+    material = data.get('texto5')
 
     #print(teeth_number)
     #print(first_tooth_position)
@@ -439,7 +442,7 @@ def guardar_datos():
 
 
     # Pasar las variables a otro_archivo.py
-    brocha_desgaste.recibir_parametros(teeth_number, first_tooth_position, step, Disk_Width)
+    #brocha_desgaste.recibir_parametros(teeth_number, first_tooth_position, step, Disk_Width, material)
 
     #texto1 = data['texto1']
     #texto2 = data['texto2']
