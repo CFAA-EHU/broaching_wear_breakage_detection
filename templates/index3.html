@@ -41,6 +41,11 @@
         <input type="text" id="var4" name="var4" placeholder="Escribe algo...">
     </div>
 
+    <div>
+        <label for="var5">Material:</label>
+        <input type="text" id="var5" name="var5" placeholder="Escribe algo...">
+    </div>
+
     <button type="button" id="boton" disabled>Guardar</button>
 
     <div id="mensaje"></div>
@@ -57,6 +62,7 @@
             var var2Input = document.getElementById("var2");
             var var3Input = document.getElementById("var3");
             var var4Input = document.getElementById("var4");
+            var var5Input = document.getElementById("var5");
 
             var botonGuardar = document.getElementById("boton");
 
@@ -74,6 +80,7 @@
             var valorTexto2 = document.getElementById("var2").value;
             var valorTexto3 = document.getElementById("var3").value;
             var valorTexto4 = document.getElementById("var4").value;
+            var valorTexto5 = document.getElementById("var5").value;
 
             // Enviar los valores al servidor Flask (puedes usar AJAX para esto)
             fetch("/guardar_datos", {
@@ -85,7 +92,8 @@
                     texto1: valorTexto1,
                     texto2: valorTexto2,
                     texto3: valorTexto3,
-                    texto4: valorTexto4
+                    texto4: valorTexto4,
+                    texto5: valorTexto5
                 })
             })
                 .then(response => {
@@ -95,8 +103,13 @@
                         localStorage.setItem("texto2", valorTexto2);
                         localStorage.setItem("texto3", valorTexto3);
                         localStorage.setItem("texto4", valorTexto4);
+                        localStorage.setItem("texto5", valorTexto5);
                         // Mostrar el mensaje en el div de mensaje
                         document.getElementById("mensaje").textContent = "Datos guardados con éxito";
+
+                        // Después de enviar los datos al servidor, llama a verificarNuevosArchivos
+                        verificarNuevosArchivos();
+
                     } else {
                         console.error("Error al guardar los datos");
                     }
@@ -111,6 +124,7 @@
         document.getElementById("var2").addEventListener("input", habilitarBotonGuardar);
         document.getElementById("var3").addEventListener("input", habilitarBotonGuardar);
         document.getElementById("var4").addEventListener("input", habilitarBotonGuardar);
+        document.getElementById("var5").addEventListener("input", habilitarBotonGuardar);
     </script>
 
     <script>
@@ -133,7 +147,7 @@
         }
 
         // Iniciar la verificación de nuevos archivos al cargar la página
-        verificarNuevosArchivos();
+        // verificarNuevosArchivos();
     </script>
 </body>
 </html>
