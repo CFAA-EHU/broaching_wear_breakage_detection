@@ -13,7 +13,7 @@ import time
 import subprocess
 
 
-disp_savvy_ekin = '10.150.64.10'
+disp_savvy_ekin = 'IP_BROACHING_MACHINE'
 maquina_bro = 'GHT_6HWAJA'
 
 current_mili_time = round(time.time() * 1000)
