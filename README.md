@@ -10,4 +10,4 @@ Poner la app en marcha:
 - Darle al boton verde de _Run_ o ejecutar _python3 main.py_ en la terminal de Visual Studio
 - Abrir el navegador y poner _http://127.0.0.1:5000/_
 - Introducir los parametros de entrada y darle a _Guardar_
-- Empezar con la simulación manual, copiar un csv de la carpeta Rotura a la carpeta _prueba_
+- Empezar con la simulación manual, copiar en orden un csv de la carpeta Rotura a la carpeta _prueba_ (ir haciendo esto con cada csv)
