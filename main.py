@@ -7,12 +7,12 @@ import time
 import joblib
 import pandas as pd
 
-#from urllib import request
+
 
 from flask import Flask, request, redirect, url_for, render_template, jsonify
 from matplotlib import pyplot as plt
 
-import brocha_desgaste
+
 
 #import brocha_desgaste
 
@@ -45,11 +45,15 @@ contador_csvs=0
 
 nuevo_archivo_detectado = False
 
+directorio_actual = os.getcwd()
+print(directorio_actual)
+
+
 # Ruta para coger los datos
-pathDL = '/home/cfaa/PycharmProjects/flask_python/Rotura/prueba'  # 20EKIB03_CTS20D03
+pathDL = directorio_actual + '/Rotura/prueba'  # 20EKIB03_CTS20D03
 # Tras tratar los datos ruta donde guardar los csv normalizados (se puede no guardar)
-ruta_csvN = '/home/cfaa/PycharmProjects/flask_python/Rotura/Normalizados'
-ruta = "/home/cfaa/PycharmProjects/flask_python/Rotura/Rotura_Analisis"
+ruta_csvN = directorio_actual + '/Rotura/Normalizados'
+ruta = directorio_actual + "/Rotura/Rotura_Analisis"
 nombreEnsayo = str('UTK68')
 #ruta_modelo = ruta + "/" + "RFR_Modelo_entrenado.pkl"
 
@@ -152,7 +156,7 @@ def FigTorque(label, dfbroach, MediaEstable, ZEI, nombre, y_max, y_min):
     plt.text(x=ZEI, y=y_max, s=nombre, color='black')
     plt.ylim([y_min, y_max])
     plt.legend(loc="lower left")
-    plt.savefig("/home/cfaa/PycharmProjects/flask_python/static" + '/' + 'TorqueCompleto_' + nombre + '.png')
+    plt.savefig(directorio_actual + "/static" + '/' + 'TorqueCompleto_' + nombre + '.png')
     #plt.show()
 
 
@@ -199,7 +203,7 @@ def AnalisisTorqueViolin(DLlist_MT, Pasadas, zES, zEI, ylim_max, ylim_min, nombr
     for i, values in enumerate(data):
         ax.hlines(values.median(), i + 1 - 0.2, i + 1 + 0.2, colors='r', linestyles='dashed')
 
-    plt.savefig('/home/cfaa/PycharmProjects/flask_python/static' + '/' + 'Violin' + nombre + '.png')
+    plt.savefig(directorio_actual + '/static' + '/' + 'Violin' + nombre + '.png')
     #plt.show()
 
 
@@ -264,7 +268,7 @@ def AnalisisRotura(DLlist_MT, valor, nombre, y_min, y_max, ZEI):
     plt.text(x=ZEI, y=y_min, s=nombre, color='black')
     plt.ylim([y_min, y_max])
     plt.legend(loc="lower left")
-    plt.savefig('/home/cfaa/PycharmProjects/flask_python/static' + '/roturas_' +  nombre + str(valor) + '.png')
+    plt.savefig(directorio_actual + '/static' + '/roturas_' +  nombre + str(valor) + '.png')
     #plt.show()
 
     print('Analizo en qué diente ha ocurrido la rotura')
@@ -398,10 +402,6 @@ def Estatis(DLlist_MT, valores, zES, zEI, colores, nombre):
 
 @app.route('/')
 def hello_world():
-    #file = open('gui/index3.html','r')
-    #html_string = file.read()
-    #file.close()
-    #return html_string
     return render_template('index3.html')
 
 
@@ -441,21 +441,7 @@ def guardar_datos():
     zBS = int(first_tooth_position) + int(teeth_number) * int(step)
 
 
-    # Pasar las variables a otro_archivo.py
-    #brocha_desgaste.recibir_parametros(teeth_number, first_tooth_position, step, Disk_Width, material)
-
-    #texto1 = data['texto1']
-    #texto2 = data['texto2']
-    #texto3 = data['texto3']
-    # Aquí puedes hacer lo que desees con los datos, como guardarlos en una base de datos
-    # o realizar alguna otra operación
-
-    #global nuevo_archivo_detectado
-    #nuevo_archivo_detectado = True  # Establecer como True cuando se guardan los datos
-
-    #return redirect(url_for('analisis_brochado'))
     return jsonify({'mensaje': 'Datos guardados con éxito'})
-    #return 'Datos guardados con éxito'
 
 
 
@@ -516,16 +502,7 @@ def verificar_nuevos_archivos_segundo():
 
 @app.route('/analisis_brochado')
 def analisis_brochado():
-    # Renderiza la nueva página HTML
-    #return render_template('nueva_pagina.html')
 
-    ########## PONER AQUI UN IF DE QUE CUANDO ENTRE UNO NUEVO SE HAGA TORO LO DE ABAJO #######
-    ## AQUI HABRIA QUE HACER ORIGINALMENTE LO DEL SAVVY ##
-    # Ciclo principal para verificar periódicamente
-    # hay_algun_archivo = verificar_entrada_archivo()
-
-    # while not (verificar_entrada_archivo()):
-    #    time.sleep(1)
 
     global nuevo_archivo_detectado
     global maximo
