@@ -57,7 +57,15 @@ ruta = directorio_actual + "/Rotura/Rotura_Analisis"
 nombreEnsayo = str('UTK68')
 #ruta_modelo = ruta + "/" + "RFR_Modelo_entrenado.pkl"
 
+# Crear las carpetas si no existen
+if not os.path.exists(pathDL):
+    os.makedirs(pathDL)
 
+if not os.path.exists(ruta_csvN):
+    os.makedirs(ruta_csvN)
+
+if not os.path.exists(ruta):
+    os.makedirs(ruta)
 
 
 
