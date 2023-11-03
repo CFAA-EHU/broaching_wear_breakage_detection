@@ -6,6 +6,7 @@ import time
 
 import joblib
 import pandas as pd
+import seaborn as sns
 
 
 
@@ -13,8 +14,6 @@ from flask import Flask, request, redirect, url_for, render_template, jsonify
 from matplotlib import pyplot as plt
 
 
-
-#import brocha_desgaste
 
 app = Flask(__name__)
 
@@ -24,11 +23,17 @@ app = Flask(__name__)
 #Disk_Width = 40
 
 
+############################################ User-input data #############################################################
 teeth_number = 0
 first_tooth_position = 0
 step = 0
 Disk_Width = 0
 material = 'IN718'
+
+
+MGnum = 1.27  # Actual limit Breaking/Wear
+NumSeg = 5  # Strokes Number stable zone
+
 
 Rotura = []  # lista donde almaceno las pasadas con rotura
 PosRot_Lista = []
@@ -50,11 +55,13 @@ print(directorio_actual)
 
 
 # Ruta para coger los datos
-pathDL = directorio_actual + '/Rotura/prueba'  # 20EKIB03_CTS20D03
+pathDL = directorio_actual + '/Rotura/Simulacion'  # 20EKIB03_CTS20D03
 # Tras tratar los datos ruta donde guardar los csv normalizados (se puede no guardar)
 ruta_csvN = directorio_actual + '/Rotura/Normalizados'
-ruta = directorio_actual + "/Rotura/Rotura_Analisis"
-nombreEnsayo = str('UTK68')
+ruta_modelo = directorio_actual + "/Rotura/Modelo"
+
+nombre = 3
+nombreEnsayo = str(nombre)
 #ruta_modelo = ruta + "/" + "RFR_Modelo_entrenado.pkl"
 
 # Crear las carpetas si no existen
@@ -64,8 +71,9 @@ if not os.path.exists(pathDL):
 if not os.path.exists(ruta_csvN):
     os.makedirs(ruta_csvN)
 
-if not os.path.exists(ruta):
-    os.makedirs(ruta)
+
+
+desgaste_guia = True
 
 
 
@@ -73,7 +81,7 @@ colores = ['limegreen', 'teal', 'orange', 'gold', 'navy']
 ################################################################
 # Esta seccion es decesaria para evitar errores o avisos
 pd.options.mode.chained_assignment = None  # default='warn'
-#sns.set_style("whitegrid")
+sns.set_style("whitegrid")
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["font.serif"] = ["Times New Roman"]
 
@@ -86,9 +94,13 @@ plt.rc('font', **font)
 plt.rcParams["font.serif"] = ["Times New Roman"]
 
 
+################################################################################################################################
+################################################### Data input ################################################################
+# Data Import
 def Import(pathDL):
     DLlist = []  # Datalogger
     all_files = glob.glob(pathDL + "/*.csv")
+    all_files.sort()
     for filename in all_files:
         df = pd.read_csv(filename, sep=',')
         DLlist.append(df)
@@ -97,7 +109,7 @@ def Import(pathDL):
     return (DLlist)
 
 
-##### TRATAMIENTO INICIAL DE DATOS_ SOLO EN ROTURA PORQUE ES ALGO DIFERENTE (encabezados y demas)
+# Same data format: To check if any changes occur when storing data in the datalogger.
 def MismoFormato(DLlist, ruta_csvN, nombre):
     # Para modificar el csv y que tenga el mismo aspecto que los de entrenamiento cambio los titulos de columnas y meto un contador en la primera columna
     Titulo_columna = ['', 'Time', 'V.A.POS.C', 'A.POS.Z', 'V.PLC.R[201]', 'V.PLC.R[202]', 'V.PLC.R[203]',
@@ -127,101 +139,97 @@ def MismoFormato(DLlist, ruta_csvN, nombre):
 def Tratamiento(DLlist):
     for i in range(len(DLlist)):  # Cleans double data
         DLlist[i] = DLlist[i][::2]
-
     for DLdf in DLlist:
         for k in range(1, 10):  # Fixes wrong values of Z and C at the beginning of the dataframe
             DLdf['A.POS.Z'].iloc[k - 1] = 0
             DLdf['V.A.POS.C'].iloc[k - 1] = DLdf['V.A.POS.C'][300]
-        DLdf['V.PLC.R[202]'] = (DLdf['V.PLC.R[202]'] + abs(DLdf['V.PLC.R[201]']))  # The torque is the combination of
-        DLdf['V.PLC.R[205]'] = (
-                    abs(DLdf['V.PLC.R[205]']) + abs(DLdf['V.PLC.R[206]']))  # The power is the combination of
-        DLdf['V.PLC.R[211]'] = (
-                    abs(DLdf['V.PLC.R[211]']) + abs(DLdf['V.PLC.R[212]']))  # The current is the combination of
-        # these two signals
-
+        DLdf['V.PLC.R[202]'] = (DLdf['V.PLC.R[202]'] + abs(
+            DLdf['V.PLC.R[201]']))  # The torque is the combination of V.PLC.R[202] nad [201]
+        DLdf['V.PLC.R[205]'] = (abs(DLdf['V.PLC.R[205]']) + abs(
+            DLdf['V.PLC.R[206]']))  # The power is the combination of V.PLC.R[205] nad [206]
+        DLdf['V.PLC.R[211]'] = (abs(DLdf['V.PLC.R[211]']) + abs(
+            DLdf['V.PLC.R[212]']))  # The current is the combination of V.PLC.R[211] nad [212]
     return (DLlist)
 
 
-################################################REPRESENTACION DE ALGUNOS DE LOS DATOS##############################
-###########################################################################################################################################################
 
-def FigTorque(label, dfbroach, MediaEstable, ZEI, nombre, y_max, y_min):
+
+################################################################################################################################
+################################################### General Plots ###############################################################
+# Torque signal of each stroke
+def FigTorque(label, dfbroach, MediaEstable, nombre, y_max, y_min):
     fig = plt.figure(figsize=(9, 5))
     ax = fig.add_subplot()
     ax.grid(False)
-    plt.plot(dfbroach['A.POS.Z'], dfbroach['V.PLC.R[202]'], label=label)
-    plt.axhline(y=MediaEstable, color='red', linestyle='--', label=f'Global Average: {MediaEstable:.2f}')
+    plt.plot(dfbroach['A.POS.Z'], dfbroach['V.PLC.R[202]'], label=label)  # Torque signal of the stroke
+    plt.axhline(y=MediaEstable, color='red', linestyle='--',
+                label=f'Global Average: {MediaEstable:.2f}')  # Average line of strokes
     plt.fill_between(
         dfbroach['A.POS.Z'],
         y_min,
-        y_max,  # esto esta mal de momento
+        y_max,
         color='red',
         alpha=0.1,
-        label=f'Average± max,min'
-    )
+        label=f'Torque Stable Range'
+    )  # Stable range of previous passes
     plt.ylabel('Torque (Nm)')
     plt.xlabel('Pos. Z (mm)')
-    plt.text(x=ZEI, y=y_max, s=nombre, color='black')
-    plt.ylim([y_min, y_max])
+    plt.ylim([y_min * 0.8, y_max * 1.2])
     plt.legend(loc="lower left")
+    plt.title('Torque signal')
     plt.savefig(directorio_actual + "/static" + '/' + 'TorqueCompleto_' + nombre + '.png')
     #plt.show()
 
-
+# Violin plot to check the signal amplitude
 def AnalisisTorqueViolin(DLlist_MT, Pasadas, zES, zEI, ylim_max, ylim_min, nombre, Pasada_rota):
-
     fig = plt.figure(figsize=(9, 5))
     ax = fig.add_subplot()
     ax.grid(False)
     data = []
-
-    labels = []  # Lista para almacenar las etiquetas de los valores en el eje x
-
-    # Estas son las que dibujo
+    labels = []
     for i, valor in enumerate(Pasadas):
         dfbroach = DLlist_MT[valor].loc[
             (DLlist_MT[valor]['A.POS.Z'] >= zEI) & (DLlist_MT[valor]['A.POS.Z'] <= zES)
             ]
         data.append(dfbroach['V.PLC.R[202]'])
-        labels.append(str(valor))
-
-    # Crear un gráfico de violín
+        label = valor + 1
+        labels.append(str(label))
+    # Violin plot
     ax.violinplot(data, showmedians=True, vert=True, widths=0.7)
-    # Configurar el eje X
-    ax.set_xlabel('Broaching Number')
+    # X axis
+    ax.set_xlabel('Stroke Number')
     ax.set_ylabel('Torque (Nm)')
     ax.set_title('Violin Plot')
-
-    # Establecer etiquetas en el eje X
+    # Labels X
     ax.set_xticks(range(1, len(Pasadas) + 1))
     ax.set_xticklabels(labels)
-
-    # Establecer límites del eje Y
-    ax.set_ylim([ylim_min, ylim_max])
-    if Pasada_rota != 9999:
+    # Labels Y
+    ax.set_ylim([ylim_min * 0.8, ylim_max * 1.2])
+    if Pasada_rota != 9999:  # to differentiate it from breakage
         Rotura.append(Pasada_rota)
         for i in Rotura:
             PosRot = len(Pasadas)
             PosRot_Lista.append(PosRot)
     for j in PosRot_Lista:
-        print(j)
-        plt.axvline(x=j, color='red', alpha=0.5)
-
-    # Añadir líneas horizontales para cada valor de 'V.PLC.R[202]'
+        plt.axvline(x=j, color='red', alpha=0.5)  # To specify the stroke where the fracture is detected.
     for i, values in enumerate(data):
         ax.hlines(values.median(), i + 1 - 0.2, i + 1 + 0.2, colors='r', linestyles='dashed')
-
     plt.savefig(directorio_actual + '/static' + '/' + 'Violin' + nombre + '.png')
     #plt.show()
 
 
-def AnalisisRotura(DLlist_MT, valor, nombre, y_min, y_max, ZEI):
+####################################################################################################################
+############################################### ANALYSIS OF BREAKAGE OR WEAR #########################################
+# Breakage
+def AnalisisRotura(DLlist_MT, valor, nombre, y_min, y_max):
 
-    pasada_rota = valor
+    global desgaste_guia
+    global zEI
+    global zES
+
+    pasada_rota = valor  # The current and previous passes for comparison and detecting the broken tooth
     pasada_ref = valor - 1
     pasadas_Analisis = [pasada_rota, pasada_ref]
-    labels = []
-    data = []
     diferencia = []
     fig = plt.figure(figsize=(9, 5))
     ax = fig.add_subplot()
@@ -230,54 +238,41 @@ def AnalisisRotura(DLlist_MT, valor, nombre, y_min, y_max, ZEI):
         dfbroach = DLlist_MT[valor].loc[
             (DLlist_MT[valor]['A.POS.Z'] >= zEI) & (DLlist_MT[valor]['A.POS.Z'] <= zES)
             ]
-        label = f'{valor} broaching stroke'
+        label = f'{valor + 1} broaching stroke'
         color = colores[i]
         plt.plot(dfbroach['A.POS.Z'], dfbroach['V.PLC.R[202]'], label=label, color=color)
-
     dfbroachRotura = DLlist_MT[pasada_rota].loc[
         (DLlist_MT[pasada_rota]['A.POS.Z'] >= zEI) & (DLlist_MT[pasada_rota]['A.POS.Z'] <= zES)
         ]
     dfbroachRef = DLlist_MT[pasada_ref].loc[
         (DLlist_MT[pasada_ref]['A.POS.Z'] >= zEI) & (DLlist_MT[pasada_ref]['A.POS.Z'] <= zES)
         ]
-    plt.text(x=zEI, y=y_max - 4, s='Stroke Number: ' + str(pasada_rota), color='k')
-    diferencia = abs(dfbroachRotura['V.PLC.R[202]'] - dfbroachRef['V.PLC.R[202]'])
-    maximos_diferencia = diferencia.nlargest(3)
+
+    label_PR = pasada_rota + 1
+    plt.title('Fracture Analysis stroke: ' + str((label_PR)))
+    diferencia = abs(dfbroachRotura['V.PLC.R[202]'] - dfbroachRef[
+        'V.PLC.R[202]'])  # To detect the broken tooth, the maximum difference in torque signal for each tooth is estimated (Between current stroke and previous)
+    maximos_diferencia = diferencia.nlargest(3)  # We retain the top 3 most likely ones
     indices_maximos = maximos_diferencia.index
-    for j, indice_max_diferencia in enumerate(indices_maximos):
+    for j, indice_max_diferencia in enumerate(indices_maximos):  # To show the broken tooth number
         a_pos_z_max_diferencia = dfbroachRotura.loc[indice_max_diferencia, 'A.POS.Z']
-        #print("------ A_pos_z_max_diferencia -------- :" + str(a_pos_z_max_diferencia))
-        DienteRotura = int(round((a_pos_z_max_diferencia - first_tooth_position) / step))
-        print(
-            f"Para la pasada {pasada_rota}, el máximo {j + 1} de diferencia se da en A.POS.Z = {a_pos_z_max_diferencia} diente número {DienteRotura}, con una diferencia de {maximos_diferencia.iloc[j]}")
-        zRot1 = (DienteRotura - 1) * step + first_tooth_position
-        zRot2 = (DienteRotura + 1) * step + first_tooth_position
-        # plt.axvline(x=zRot1, color='red', alpha=0.5)
-        # plt.axvline(x=zRot2, color='red', alpha=0.5)
+        DienteRotura = int(round((float(a_pos_z_max_diferencia) - float(first_tooth_position)) / float(step)))
+        zRot1 = (DienteRotura - 1) * int(step) + int(first_tooth_position)
+        zRot2 = (DienteRotura + 1) * int(step) + int(first_tooth_position)
         plt.text(x=zRot1, y=(y_max - 8), s='Z' + str(DienteRotura), color='k')
         plt.axvspan(zRot1, zRot2, alpha=0.05, color='red')
 
     indice_max_diferencia = diferencia.idxmax()
     a_pos_z_max_diferencia = dfbroachRotura.loc[indice_max_diferencia, 'A.POS.Z']
-    # Exporta dfbroachRotura a un archivo CSV
-    #dfbroachRotura.to_csv(ruta + '/' + str(valor) + 'dfbroachRotura.csv', index=False)
-
-    # Exporta dfbroachRef a un archivo CSV
-    #dfbroachRef.to_csv(ruta + '/' + str(valor) + 'dfbroachRef.csv', index=False)
-
-    # Exporta diferencia a un archivo CSV
-    #diferencia.to_csv(ruta + '/' + str(valor) + 'diferencia.csv', index=False)
-    DienteRotura = int(round(a_pos_z_max_diferencia - first_tooth_position) / step)
-    print(
-        f"La máxima diferencia se da en A.POS.Z = {a_pos_z_max_diferencia} diente número {DienteRotura}, con una diferencia de {diferencia.max()}")
-
+    DienteRotura = int(
+        round(float(a_pos_z_max_diferencia) - float(first_tooth_position)) / float(step))  # Conversion of height to tooth number
     plt.ylabel('Torque (Nm)')
     plt.xlabel('Pos. Z (mm)')
-    plt.text(x=ZEI, y=y_min, s=nombre, color='black')
-    plt.ylim([y_min, y_max])
+    plt.ylim([y_min * 0.8, y_max * 1.2])
     plt.legend(loc="lower left")
-    plt.savefig(directorio_actual + '/static' + '/roturas_' +  nombre + str(valor) + '.png')
+    plt.savefig(directorio_actual + '/static' + '/rotura_diente.png')
     #plt.show()
+    desgaste_guia= False
 
     print('Analizo en qué diente ha ocurrido la rotura')
     return (DienteRotura)
@@ -285,7 +280,115 @@ def AnalisisRotura(DLlist_MT, valor, nombre, y_min, y_max, ZEI):
 
 
 
-def Estatis(DLlist_MT, valores, zES, zEI, colores, nombre):
+# Wear analysis
+def AnalisisDesgaste(DLlist_MT, teeth_number, nombre, Pasadas):
+    # Data preparation for the previously trained model.
+    dataset = []
+    teeth_number = int(teeth_number)
+    for i in range(teeth_number):
+        dataset.append(pd.DataFrame(index=range(len(Pasadas)),
+                                    columns=['Slot', 'PosC', 'MedianPower', 'MedianCurrent', 'MedianTorque',
+                                             'Trial']))
+        dataset[i]['Trial'] = nombre
+        for k in range(len(Pasadas)):
+            dataset[i]['Slot'][k] = k + 1
+            dataset[i]['PosC'][k] = DLlist_MT[k]['V.A.POS.C'].median()
+            dataset[i]['MedianPower'][k] = float(DLlist_MT[k]['V.PLC.R[205]'].loc[(DLlist_MT[k]['A.POS.Z'] >= (
+                        float(first_tooth_position) + float(step) * i))
+                                                                                  & (DLlist_MT[k]['A.POS.Z'] <= (
+                        float(first_tooth_position) + float(step) * (i + 1)))].median()) \
+                                           - float(DLlist_MT[k]['V.PLC.R[205]'].loc[(DLlist_MT[k]['A.POS.Z'] >= 500)
+                                                                                    & (DLlist_MT[k]['A.POS.Z'] <= (
+                        float(first_tooth_position) - float(step) * 2))].median())
+
+            dataset[i]['MedianCurrent'][k] = float(DLlist_MT[k]['V.PLC.R[211]'].loc[(DLlist_MT[k]['A.POS.Z'] >= (
+                        float(first_tooth_position) + float(step) * i))
+                                                                                    & (DLlist_MT[k]['A.POS.Z'] <= (
+                        float(first_tooth_position) + float(step) * (i + 1)))].median()) \
+                                             - float(DLlist_MT[k]['V.PLC.R[211]'].loc[(DLlist_MT[k]['A.POS.Z'] >= 500)
+                                                                                      & (DLlist_MT[k]['A.POS.Z'] <= (
+                        float(first_tooth_position) - float(step) * 2))].median())
+
+            dataset[i]['MedianTorque'][k] = float(DLlist_MT[k]['V.PLC.R[202]'].loc[(DLlist_MT[k]['A.POS.Z'] >= (
+                        float(first_tooth_position) + float(step) * i))
+                                                                                   & (DLlist_MT[k]['A.POS.Z'] <= (
+                        float(first_tooth_position) + float(step) * (i + 1)))].median()) \
+                                            - float(DLlist_MT[k]['V.PLC.R[202]'].loc[(DLlist_MT[k]['A.POS.Z'] >= 500)
+                                                                                     & (DLlist_MT[k]['A.POS.Z'] <= (
+                        float(first_tooth_position) - float(step) * 2))].median())
+
+    for i in range(teeth_number):
+        start_power = dataset[i]['MedianPower'][0]
+        start_torque = dataset[i]['MedianTorque'][0]
+        start_current = dataset[i]['MedianCurrent'][0]
+        for k in range(len(dataset[i])):
+            dataset[i]['MedianPower'][k] = dataset[i]['MedianPower'][k] - start_power
+            dataset[i]['MedianTorque'][k] = dataset[i]['MedianTorque'][k] - start_torque
+            dataset[i]['MedianCurrent'][k] = dataset[i]['MedianCurrent'][k] - start_current
+    for i in range(teeth_number):
+        dataset[i] = dataset[i][0:440]
+    datasett = dataset[5:-5]  # Quito los 5 primeros y ultimos dientes
+    datos_x = pd.concat(datasett)  # Data for predict wear
+    # Previous trainned Model Random Forest
+    path_RFR = ruta_modelo + "/" + "RandomForest_Regresion_entrenado.pkl"
+    modelo_RFR = joblib.load(path_RFR)
+    # Predict wear
+    Y_RFR = modelo_RFR.predict(datos_x)
+
+    AverageWear = sum(Y_RFR) / len(Y_RFR)  # Average wear in each stroke
+    return (AverageWear)
+
+
+def DesgasteGraficar(AverageWear, valor, wear, B_wear, SuText, stroke):
+
+    global desgaste_guia
+
+    wear.append(AverageWear)
+    stroke.append(valor + 1)
+    if len(wear) == 1:  # If it's the first one, just store it.
+        pass
+    else:
+        if wear[-2] > AverageWear or len(wear) > 11:  # To draw the histogram. Do not decrease or store too many.
+            wear.pop()
+            stroke.pop()  # If the condition is met, remove the last instance from each list.
+            a = str(max(stroke))
+            b = str(min(stroke))  # Keep the initial and final stroke number for each range.
+            A_Wear = sum(wear) / len(wear)
+            B_wear.append(A_Wear)
+            SuText.append(b + '-' + a)
+            wear = []
+            stroke = []
+            wear.append(AverageWear)
+            stroke.append(valor + 1)
+    ####### Two plots a- wear of each stroke b-Average of a range 1-10
+    # a- Histogram for wear of each stroke
+    plt.figure(figsize=(10, 4))
+    plt.subplot(1, 2, 1)  # Subplot first position
+    stroke_Str = [str(item) for item in stroke]
+    plt.bar(stroke_Str, wear, color='skyblue')
+    plt.title('Wear Predicted for each stroke')
+    plt.xlabel('Stroke Number')  # X axis Title
+    plt.ylabel('Predicted Wear [mm]')  # Y axis Title
+    plt.grid(False)
+
+    plt.subplot(1, 2, 2)  # Subplot second position
+    plt.plot(SuText, B_wear, marker='o', color='green', linestyle='-')
+    plt.title('Trend of predicted wear')
+    plt.xlabel('Stroke Range')  # X axis Title
+    plt.ylabel('Predicted Wear [mm]')  # Y axis Title
+    plt.grid(False)
+
+    plt.tight_layout()  # Automatically adjust the spacing.
+    plt.savefig(directorio_actual + '/static' + '/desgaste_graficar.png')
+
+    desgaste_guia=True
+    #plt.show()
+    return (wear, stroke)
+
+
+####################################################################################################################
+################################################## MAIN PROGRAM ##############################################
+def Estatis(DLlist_MT, valores, zES, zEI, nombre):
 
     global maximo
     global minimo
@@ -293,7 +396,10 @@ def Estatis(DLlist_MT, valores, zES, zEI, colores, nombre):
     global rango
     global desv
     global IQ
+    global y_max
+    global y_min
 
+    # Declare the necessary variables.
     MaxEstable = []
     MinEstable = []
     RangoEstable = []
@@ -301,34 +407,29 @@ def Estatis(DLlist_MT, valores, zES, zEI, colores, nombre):
     data = []
     labels = []
     Pasadas = []
-
-    tr = 0  # Contadores necesarios para limpiar el violin
+    tr = 0
     k = 1
     num = 0
-    # De momento voy recorriendo todas las pasadas, luego poco a poco. MIRAR CON ENDIKA
+    SuText = []
+    B_wear = []
+    wear = []
+    stroke = []
+
     for i, valor in enumerate(valores):
         Pasadas.append(valor)
         dfbroach = DLlist_MT[valor].loc[
             (DLlist_MT[valor]['A.POS.Z'] >= zEI) & (DLlist_MT[valor]['A.POS.Z'] <= zES)
             ]
         data.append(dfbroach['V.PLC.R[202]'] - 26)
-        labels.append(str(valor))  # Almaceno los valores que estan en el rango de la zona estable
-
+        labels.append(str(valor))  # stable zone values
         ################################################################################
-        ##################################################################################
-        ############################################################################
-
-        print('*****************NUMERO DE BROCHADO')
-        print(valor)
-
-        # CALCULO ESTADISTICOS DE CADA PASADA
+        print('***************** STROKE *******************')
+        print(valor + 1)
+        # EDA
         maximo = dfbroach['V.PLC.R[202]'].max()
         minimo = dfbroach['V.PLC.R[202]'].min()
         media = dfbroach['V.PLC.R[202]'].mean()
         rango = maximo - minimo
-        y_max = maximo * 1.2
-        y_min = minimo * 0.8
-
         desv = dfbroach['V.PLC.R[202]'].std()
         Q1 = dfbroach['V.PLC.R[202]'].quantile(0.25)
         Q2 = dfbroach['V.PLC.R[202]'].median()
@@ -350,25 +451,28 @@ def Estatis(DLlist_MT, valores, zES, zEI, colores, nombre):
         print("Amplitud: " + str(rango))
         print("Desv: " + str(desv))
         print("IQR: " + str(IQ))
-        # Dibujo Torque de cada pasada
-        label = f'{valor} broaching stroke'
-        FigTorque(label, dfbroach, media, zEI, nombre, y_max, y_min)  # LA IMAGEN DEL TORQUE COMPLETA CON EL MAX MIN
 
-        # SEPARO: PRIMERAS PASADAS, SIN ROTURA Y CON ROTURA
-        if valor == 1 or valor == 0:
+
+        # 3 clusters; Breakage, wear and first strokes
+        if valor == 1 or valor == 0:  # First strokes
             MaxEstable.append(maximo)
             MinEstable.append(minimo)
-            RangoEstable.append(rango)  # calculo el rango para darlo por estable, las primeras siempre son estables
+            y_max = max(MaxEstable)
+            y_min = min(MinEstable)
+            RangoEstable.append(rango)
             MediaEstable.append(media)
-            DienteRoto = 9999  # VAlor que pongo aleatorio para descartarlo luego
+            DienteRoto = 9999
+            # Violin Plot
             AnalisisTorqueViolin(DLlist_MT, Pasadas, zES, zEI, y_max, y_min, nombre, DienteRoto)
+            label = f'{valor + 1} broaching stroke'
+            FigTorque(label, dfbroach, media, nombre, y_max, y_min)
             tr = tr + 1
+            AverageWear = AnalisisDesgaste(DLlist_MT, teeth_number, nombre, Pasadas)
+            wear, stroke = DesgasteGraficar(AverageWear, valor, wear, B_wear, SuText, stroke)
         else:
-            MaxRango = max(RangoEstable)  # De momento lo calculo con la media pero habra que ver
             MediaRango = sum(RangoEstable) / len(RangoEstable)
-            if rango >= MediaRango * 1.27:  # Aqui tengo rotura
-                print('Ha ocurrido una rotura')
-                # Vacio las listas estables para detectar nuevas roturas
+            if rango >= MediaRango * MGnum:
+                print('A breakage has occurred')
                 MaxEstable = []
                 MinEstable = []
                 RangoEstable = []
@@ -378,30 +482,37 @@ def Estatis(DLlist_MT, valores, zES, zEI, colores, nombre):
                 RangoEstable.append(rango)
                 MediaEstable.append(media)
                 tr = 0
-                # FUNCIONES EXTERNAS PARA ROTURA
-                DienteRoto = AnalisisRotura(DLlist_MT, valor, nombre, y_min, y_max, zEI)
                 AnalisisTorqueViolin(DLlist_MT, Pasadas, zES, zEI, y_max, y_min, nombre, valor + 1)
+                # Plot Torque of each pass
+                label = f'{valor + 1} broaching stroke'
+                FigTorque(label, dfbroach, media, nombre, y_max, y_min)
+                # External function for breaking
+                DienteRoto = AnalisisRotura(DLlist_MT, valor, nombre, y_min, y_max)
                 num = len(Pasadas)
                 k = 1
             else:
-                DienteRoto = 9999
-                # print('La herramienta no ha sufrido roturas')
-                # En el caso de no tener roturas lo almaceno para calcular con ello tambien la media
+                pasadass = []
+                pasadass.append(valor)
+                DienteRoto = 9999  # high random value to rule out
+                print('The tool has not been broken')
                 tr = tr + 1
-
-                # AnalisisDesgaste(ruta_modelo, dataset)
                 MaxEstable.append(maximo)
                 MinEstable.append(minimo)
+                y_max = max(MaxEstable)
+                y_min = min(MinEstable)
                 RangoEstable.append(rango)
                 MediaEstable.append(media)
                 AnalisisTorqueViolin(DLlist_MT, Pasadas, zES, zEI, y_max, y_min, nombre, DienteRoto)
-                if tr >= 10:
+                # Plot Torque of each pass
+                label = f'{valor + 1} broaching stroke'
+                FigTorque(label, dfbroach, media, nombre, y_max, y_min)  # Torque figure
+                if tr >= 10:  # Counter for the violinplot to do every 10
                     Pasadas = Pasadas[:2 * k + num]
                     tr = 0
                     k = k + 1
-
-                # AQUI ME TOCA METER LO DE ML, LO HARE EN UNA FUNCION EXTERNA
-
+                # ML for wear analysis
+                AverageWear = AnalisisDesgaste(DLlist_MT, teeth_number, nombre, Pasadas)
+                wear, stroke = DesgasteGraficar(AverageWear, valor, wear, B_wear, SuText, stroke)
 
 
 
@@ -442,7 +553,7 @@ def guardar_datos():
 
 
     # Marca especifico las zonas
-    Transition = int(Disk_Width) / int(step) + 5
+    Transition = int(Disk_Width) / int(step) + NumSeg
     zBI = int(first_tooth_position)
     zEI = int(first_tooth_position) + (Transition * int(step))
     zES = int(first_tooth_position) + (int(teeth_number) - Transition) * int(step)
@@ -526,6 +637,7 @@ def analisis_brochado():
     global zEI
     global zES
     global zBS
+    global desgaste_guia
 
     if nuevo_archivo_detectado:
         print("SE HA ENCONTRADO UN CSV NUEVO")
@@ -542,14 +654,14 @@ def analisis_brochado():
         #valores = list(range(0, len(DLlist_MT)))
         print("----------------------------------------------")
         print(valores)
-        Estatis(DLlist_MT, valores, zES, zEI, colores, nombreEnsayo)
+        Estatis(DLlist_MT, valores, zES, zEI, nombreEnsayo)
         print("ESTATIS HECHO")
         #contador_csvs = contador_csvs + 1
-        contador_csvs = num_archivos_csv_existentes - 1
+        contador_csvs = num_archivos_csv_existentes
         print('LLLLEGAAAA AQUIII')
         #return render_template('index2.html')
 
-        return render_template('index2.html', diente=contador_csvs, maximo=maximo, minimo=minimo, media=media, rango=rango, desv=desv, IQ=IQ)
+        return render_template('index2.html', diente=contador_csvs, maximo=maximo, minimo=minimo, media=media, rango=rango, desv=desv, IQ=IQ, desgaste_guia=desgaste_guia)
 
         # return render_template('index2.html')
 
