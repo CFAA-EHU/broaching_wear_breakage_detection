@@ -17,39 +17,52 @@
 
 <body>
 
+    <div class="header-container">
+        <img src="{{ url_for('static', filename='logo_cfaa.jpg') }}" alt="Logo Izquierdo" class="logo-left">
+        <h1>BROACHING PROCESS MONITORING</h1>
+        <img src="{{ url_for('static', filename='logo_Interq.png') }}" alt="Logo Derecho" class="logo-right">
+    </div>
+
     <div class="form-container">
-    <h1>Broaching parameters</h1>
-    <p>Please enter the following parameters</p>
+    <h1>Please enter the following broaching parameters:</h1>
 
     <div>
         <label for="var1">Teeth Number:</label>
-        <input type="text" id="var1" name="var1" placeholder="Escribe algo...">
+        <input type="text" id="var1" name="var1" placeholder="42 (default)">
     </div>
 
     <div>
         <label for="var2">First Tooth Position (mm):</label>
-        <input type="text" id="var2" name="var2" placeholder="Escribe algo...">
+        <input type="text" id="var2" name="var2" placeholder="915 (default)">
     </div>
 
     <div>
         <label for="var3">Step (mm):</label>
-        <input type="text" id="var3" name="var3" placeholder="Escribe algo...">
+        <input type="text" id="var3" name="var3" placeholder="10 (default)">
     </div>
 
     <div>
         <label for="var4">Disk Width (mm):</label>
-        <input type="text" id="var4" name="var4" placeholder="Escribe algo...">
+        <input type="text" id="var4" name="var4" placeholder="40 (default)">
     </div>
 
     <div>
         <label for="var5">Material:</label>
-        <input type="text" id="var5" name="var5" placeholder="Escribe algo...">
+        <input type="text" id="var5" name="var5" placeholder="IN718 (default)">
     </div>
 
-    <button type="button" id="boton" disabled>Guardar</button>
+    <button type="button" id="boton" disabled>Save and Start simulation</button>
 
     <div id="mensaje"></div>
     </div>
+
+    <footer>
+        <p class="footer-text">Interlinked Process, Product and Data Quality framework for Zero-Defects Manufacturing</p>
+        <img src="{{ url_for('static', filename='eu.png') }}" alt="Logo Derecho" class="footer-logo">
+        <p class="footer-text2">This project has received funding from the European Union’s Horizon 2020 Research and Innovation.
+        Programme under grant agreement No. 958357 and it is an initiative of the Factories-of-the-Future (FoF)
+        Public Private Partnership.</p>
+    </footer>
 
     <!-- Bootstrap core JavaScript -->
     <script src="https://getbootstrap.com/docs/4.0/assets/js/vendor/popper.min.js"></script>
@@ -105,7 +118,7 @@
                         localStorage.setItem("texto4", valorTexto4);
                         localStorage.setItem("texto5", valorTexto5);
                         // Mostrar el mensaje en el div de mensaje
-                        document.getElementById("mensaje").textContent = "Datos guardados con éxito";
+                        document.getElementById("mensaje").textContent = "Data successfully saved";
 
                         // Después de enviar los datos al servidor, llama a verificarNuevosArchivos
                         verificarNuevosArchivos();
