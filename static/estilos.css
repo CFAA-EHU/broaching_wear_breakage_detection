@@ -1,27 +1,20 @@
 /* Estilos generales */
 body {
     font-family: Arial, sans-serif;
-    background-color: #F2F2F2;
     margin: 0;
     padding: 0;
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 3px;
-    background-color: #FFFFFF;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
-/* Encabezado principal */
-h1 {
-    font-size: 28px;
+/* Estilo para el título h1 */
+.header-container h1 {
+    margin: 0; /* Elimina el margen para h1 */
+    padding: 4px; /* Elimina el relleno para h1 */
+    font-size: 21px;
     font-weight: bold;
-    color: #085FBB;
-    text-align: center; /* Centrar el texto horizontalmente */
-    background-color: #ABC5E1; /* Color de fondo del título */
-    padding: 10px; /* Espacio dentro del título */
+    color: #000000;
+    margin-bottom:10px;
+    margin-top:5px;
 }
 
 /* Contenedor del número de brochado */
@@ -29,47 +22,51 @@ h1 {
     margin-left: 10px; /* Espacio en el margen izquierdo */
 }
 
-/* Título "Broaching stroke" */
 h2 {
-    font-size: 22px; /* Tamaño de fuente */
-    color: #333; /* Color del texto */
-    margin: 8px 0; /* Espacio en los márgenes superior e inferior */
-    margin-left: 13px
+    margin: 0; /* Elimina el margen para h2 */
+    padding: 2px; /* Elimina el relleno para h2 */
+    font-size: 16px;
+    color: #000000;
+    margin-right: 10px;
+    margin-left: 10px;
+    margin-bottom:45px;
+}
+
+
+
+
+
+.container {
+    display: flex;
 }
 
 .table-container {
-    display: flex; /* Muestra las tablas en línea */
-    justify-content: space-between; /* Alinea las tablas al principio y al final del contenedor */
-    align-items: center; /* Alinea verticalmente las tablas */
+    display: flex;
+    flex-direction: column; /* Cambia la dirección del flujo a vertical */
+    text-align: center; /* Alinea el contenido de las tablas al centro */
     margin-bottom: 10px; /* Espacio entre las tablas */
+    margin-left: 10px;
 }
-
 
 
 /* Estilos para la tabla minimalistBlack */
 table.minimalistBlack {
-    border: 1px solid #03122A;
-    width: 30%; /* Cambia el ancho al 50% para que ocupen el 50% del contenedor */
-    text-align: center;
+    border: 1px solid #000000;
+    width: 258px; /* Cambia el ancho al 45% para que ambas tablas quepan en una columna */
     border-collapse: collapse;
-    margin-left: 135px
 }
 
 table.minimalistBlack td,
 table.minimalistBlack th {
-    border: 1px solid #03122A;
+    border: 1px solid #000000;
     padding: 5px 4px;
-    width: 50%;
-}
-
-table.minimalistBlack tbody td {
-    font-size: 17px;
-    color: #000000;
+    width: 129px; /* Ajusta el ancho de las celdas al 50% del ancho de la tabla */
+    font-size: 13.5px;
 }
 
 /* Establece el color de fondo para todas las filas pares en el cuerpo de la tabla (azul) */
 table.minimalistBlack tbody tr:nth-child(even) {
-    background-color: #BBF1E1; /* Cambia el color de fondo a azul claro */
+    background-color: #FFFFFF; /* Cambia el color de fondo a azul claro */
 }
 
 /* Establece el color de fondo para todas las filas impares en el cuerpo de la tabla (blanco) */
@@ -79,40 +76,34 @@ table.minimalistBlack tbody tr:nth-child(odd) {
 
 /* Establece el color de fondo del encabezado (azul oscuro) */
 table.minimalistBlack thead {
-    background: #5AA7A7; /* Cambia el color de fondo a azul oscuro */
+    background: #9B9DA6; /* Cambia el color de fondo a azul oscuro */
 }
 
 table.minimalistBlack thead th {
-    font-size: 17px;
+    font-size: 13.5px;
     font-weight: bold;
     color: #000000;
-    text-align: center;
 }
 
 /* Estilos para la tabla minimalistGreen */
 table.minimalistGreen {
-    border: 1px solid #003300; /* Cambia el color del borde a verde */
-    width: 30%; /* Cambia el ancho al 50% para que ocupen el 50% del contenedor */
-    text-align: center;
+    margin-top: 15px;
+    border: 1px solid #000000; /* Cambia el color del borde a verde */
+    width: 258px; /* Cambia el ancho al 45% para que ambas tablas quepan en una columna */
     border-collapse: collapse;
-    margin-right: 135px
 }
 
 table.minimalistGreen td,
 table.minimalistGreen th {
-    border: 1px solid #003300; /* Cambia el color del borde a verde */
+    border: 1px solid #000000; /* Cambia el color del borde a verde */
     padding: 5px 4px;
-    width: 50%;
-}
-
-table.minimalistGreen tbody td {
-    font-size: 17px;
-    color: #000000;
+    width: 129px; /* Ajusta el ancho de las celdas al 50% del ancho de la tabla */
+    font-size: 13.5px;
 }
 
 /* Establece el color de fondo para todas las filas pares en el cuerpo de la tabla (verde claro) */
 table.minimalistGreen tbody tr:nth-child(even) {
-    background-color: #BBFFBB; /* Cambia el color de fondo a verde claro */
+    background-color: #FFFFFF; /* Cambia el color de fondo a verde claro */
 }
 
 /* Establece el color de fondo para todas las filas impares en el cuerpo de la tabla (blanco) */
@@ -122,14 +113,15 @@ table.minimalistGreen tbody tr:nth-child(odd) {
 
 /* Establece el color de fondo del encabezado (verde oscuro) */
 table.minimalistGreen thead {
-    background: #003300; /* Cambia el color de fondo a verde oscuro */
+    background: #9B9DA6; /* Cambia el color de fondo a verde oscuro */
 }
 
 table.minimalistGreen thead th {
-    font-size: 17px;
+    font-size: 13.5px;
     font-weight: bold;
-    color: #00CC00; /* Cambia el color del texto a verde claro */
+    color: #000000; /* Cambia el color del texto a verde claro */
 }
+
 
 /* Estilos para el contenedor de apilamiento de tablas
 .table-stack-container {
@@ -143,34 +135,105 @@ table.minimalistGreen thead th {
 }
 
 .image-container {
-    display: flex; /* Muestra las imágenes en línea */
-    justify-content: space-between; /* Alinea las imágenes en el centro horizontalmente */
-    align-items: center; /* Alinea verticalmente las imágenes */
-    margin-bottom: 10px; /* Espacio entre las imágenes */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 40px; /* Espacio entre las tablas y las imágenes */
+    margin-top:10px;
+}
+
+.image-row {
+    display: flex;
+    justify-content: center; /* Alinea las imágenes en la primera fila */
 }
 
 /* Ajusta el tamaño máximo de las imágenes */
 .image img {
-    max-width: 95%;
-    border: 1px solid #000; /* Añade un borde negro de 2 píxeles de ancho */
-
+    max-width: 98%;
+    border: 1px solid #000;
 }
 
+.image2 img {
+    max-width: 98%;
+    border: 1px solid #000;
+}
 
-/* Estilos para la sección de parámetros */
-.section-title {
-    color: #5AA7A7;
-    font-size: 24px;
+/* Ajusta el tamaño máximo de las imágenes */
+.image3 img {
+    max-width: 62.5%;
+    border: 1px solid #000;
+    margin-left: 180px;
     margin-top: 20px;
 }
 
-
-label {
-    font-weight: bold;
-    margin-right: 10px;
+.image4 img {
+    max-width: 50.5%;
+    border: 1px solid #000;
+    margin-left: 230px;
+    margin-top: 20px;
 }
 
-* {
+/* Estilos para el contenedor del encabezado */
+.logos-container {
+    max-width: 100%;
+    padding: 2px 0; /* Agrega espacios de 60px a la izquierda y derecha */
+    display: flex;
+    align-items: center; /* Alinea verticalmente los elementos */
+    background-color: #FFFFFF;
+    text-align: center;
+    position: relative; /* Para posicionar los elementos internos */
+    margin-top:20px;
+}
+
+/* Estilo para los logos */
+.logo-left {
+    max-width: 80px; /* Tamaño cuadrado de 100x100px */
+    height: auto;
     margin-left: 10px;
+}
+
+.logo-right {
+    max-width: 80px; /* Tamaño cuadrado de 100x100px */
+    height: auto;
+    margin-left: 10px;
+}
+
+footer {
+    bottom: 0;
+    min-width: 100%; /* Asegura que el ancho mínimo sea igual al ancho del navegador */
+    height: 38px;
+    background-color: #3B3B37;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 18px;
+    overflow: hidden; /* Oculta cualquier contenido que exceda el ancho del footer */
+}
+
+.footer-text {
+    font-size: 10px;
+    max-width: calc(100% - 60px); /* Adjust the max-width to leave space for the logo */
+    white-space: nowrap;
+    text-align: left; /* Align text to the left */
+    margin-right: 10px; /* Add some right margin for spacing */
+    margin-left: 10px; /* Add some right margin for spacing */
+    margin-top: 10px;
+}
+
+.footer-logo {
+    max-width: 40px;
+    height: auto;
+    margin-left: 300px;
+    margin-right: 20px;
+}
+
+.footer-text2 {
+    font-size: 10px;
+    max-width: calc(100% - 90px); /* Adjust the max-width to leave space for the logo and additional margin */
+    white-space: normal; /* Allow text to wrap to the next line */
+    text-align: left; /* Align text to the left */
+    margin-top: 10px;
     margin-right: 10px;
 }
+
