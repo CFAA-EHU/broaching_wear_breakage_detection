@@ -556,65 +556,63 @@ def guardar_datos():
 
 
 
-
 def verificar_entrada_archivo():
+    # Declare global variables
     global nuevo_archivo_detectado
     global num_archivos_csv_existentes
 
+    # Continuously monitor for new files
     while True:
-
+        # Count the current number of CSV files in the directory
         num_archivos_csv_actuales = len([nombre for nombre in os.listdir(pathDL) if
                                          nombre.endswith('.csv') and os.path.isfile(os.path.join(pathDL, nombre))])
-        print("Actuales: " + str(num_archivos_csv_actuales))
+        print("Current: " + str(num_archivos_csv_actuales))
 
-        print("Existentes: " + str(num_archivos_csv_actuales))
+        print("Existing: " + str(num_archivos_csv_actuales))
 
-        # Lista para realizar un seguimiento de los archivos existentes
+        # Track new files
         num_archivos_csv_nuevos = num_archivos_csv_actuales - num_archivos_csv_existentes
-        print("Nuevos " + str(num_archivos_csv_nuevos))
+        print("New " + str(num_archivos_csv_nuevos))
 
         nuevo_archivo_detectado = False
-        # Calcular la diferencia entre los archivos actuales y los existentes
-        # nuevos_archivos = archivos_actuales - archivos_existentes
-        # print(nuevos_archivos)
 
-        #if num_archivos_csv_nuevos > num_archivos_csv_existentes:
-        if num_archivos_csv_nuevos>=1:
-            print("**** Nuevos archivos CSV detectados ********")
+        # Detect new CSV files
+        if num_archivos_csv_nuevos >= 1:
+            print("**** New CSV files detected ****")
             nuevo_archivo_detectado = True
 
-            # Actualizar la lista de archivos existentes
+            # Update the count of existing files
             num_archivos_csv_existentes = num_archivos_csv_actuales
         else:
             nuevo_archivo_detectado = False
         time.sleep(2)
 
 
-# Ruta para verificar nuevos archivos
+# Route to check for new files
 @app.route('/verificar_nuevos_archivos', methods=['GET'])
 def verificar_nuevos_archivos():
+    # Check if a new file is detected
     global nuevo_archivo_detectado
 
-    print("SE ACTUALIZA NUEVO_ARCHIVO?????")
+    print("IS NEW_FILE UPDATED?????")
 
-    return jsonify({'nuevo_archivo': nuevo_archivo_detectado})
+    return jsonify({'new_file': nuevo_archivo_detectado})
 
 
-# Ruta para verificar nuevos archivos
+# Route to check for new files
 @app.route('/verificar_nuevos_archivos_segundo', methods=['GET'])
 def verificar_nuevos_archivos_segundo():
+    # Check if there is a new file
     global nuevo_archivo_detectado
 
-    print("HAY ARCHIVO NUEVO---***---")
+    print("THERE IS A NEW FILE ---***---")
 
-    return jsonify({'nuevo_archivo_segundo': nuevo_archivo_detectado})
-
+    return jsonify({'new_file_second': nuevo_archivo_detectado})
 
 
 @app.route('/analisis_brochado')
 def analisis_brochado():
-
-
+    # Global variables
     global nuevo_archivo_detectado
     global maximo
     global minimo
@@ -631,51 +629,46 @@ def analisis_brochado():
     global zBS
     global desgaste_guia
 
+    # Check if a new CSV file is detected
     if nuevo_archivo_detectado:
-        print("SE HA ENCONTRADO UN CSV NUEVO")
+        print("A NEW CSV FILE HAS BEEN FOUND")
+        # Import data
         DLlist = Import(pathDL)
-        print("IMPORT HECHO")
+        print("IMPORT DONE")
+        # Ensure uniform format of data
         DLlist_M = MismoFormato(DLlist, ruta_csvN, nombreEnsayo)
-        print("MISMO FORMATO HECHO")
-        # DLlist_MT = Tratamiento(DLlist_M, teeth_number)
+        print("SAME FORMAT DONE")
+        # Data processing
         DLlist_MT = Tratamiento(DLlist_M)
-        print("TRATAMIENTO HECHO")
+        print("PROCESSING DONE")
         print("LEN DLlist_MT: " + str(len(DLlist_MT)))
-        #valores = list(range(0, contador_csvs))
+        # Create a list of values
         valores = list(range(0, num_archivos_csv_existentes))
-        #valores = list(range(0, len(DLlist_MT)))
         print("----------------------------------------------")
         print(valores)
+        # Perform statistical analysis
         Estatis(DLlist_MT, valores, zES, zEI, nombreEnsayo)
-        print("ESTATIS HECHO")
-        #contador_csvs = contador_csvs + 1
+        print("STATISTICS DONE")
         contador_csvs = num_archivos_csv_existentes
-        print('LLLLEGAAAA AQUIII')
-        #return render_template('index2.html')
-
+        print('REACHED HERE')
+        # Return template with analysis results
         return render_template('index2.html', diente=contador_csvs, maximo=maximo, minimo=minimo, media=media, rango=rango, desv=desv, IQ=IQ, desgaste_guia=desgaste_guia)
 
-        # return render_template('index2.html')
-
     else:
-        print("NO SE HAN ENCONTRADO ARCHIVOS CSV NUEVOS")
-        # return "NO SE HAN ENCONTRADO ARCHIVOS CSV NUEVOS"
-
-
-
-
-
+        print("NO NEW CSV FILES FOUND")
+        # Inform if no new CSV files are found
+        # return "NO NEW CSV FILES FOUND"
 
 if __name__ == '__main__':
+    # Load configuration
     with open('config.json', 'r') as f:
         config = json.load(f)
-    # Iniciar el hilo para verificar archivos en segundo plano
-
-    # numero de archivoas al principio del programa
+    # Start thread for background file checking
+    # Number of files at the beginning of the program
     num_archivos_csv_existentes = len([nombre for nombre in os.listdir(pathDL) if
                                        nombre.endswith('.csv') and os.path.isfile(os.path.join(pathDL, nombre))])
 
     hilo_verificacion = threading.Thread(target=verificar_entrada_archivo)
-    hilo_verificacion.daemon = True  # El hilo se detendrá cuando se detenga la aplicación principal
+    hilo_verificacion.daemon = True  # The thread will stop when the main application stops
     hilo_verificacion.start()
     app.run()
