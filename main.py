@@ -8,78 +8,64 @@ import joblib
 import pandas as pd
 import seaborn as sns
 
-
-
 from flask import Flask, request, redirect, url_for, render_template, jsonify
 from matplotlib import pyplot as plt
 
 
-
+# Initializing Flask app
 app = Flask(__name__)
 
-#teeth_number = 42
-#first_tooth_position = 915
-#step = 10
-#Disk_Width = 40
-
-
-############################################ User-input data #############################################################
+# User-input data
 teeth_number = 0
 first_tooth_position = 0
 step = 0
 Disk_Width = 0
 material = 'IN718'
 
-
 MGnum = 1.27  # Actual limit Breaking/Wear
 NumSeg = 5  # Strokes Number stable zone
 
-
-Rotura = []  # lista donde almaceno las pasadas con rotura
+Rotura = []  # List to store broken passes
 PosRot_Lista = []
 
+maximo = 0
+minimo = 0
+media = 0
+rango = 0
+desv = 0
+IQ = 0
 
-maximo=0
-minimo=0
-media=0
-rango=0
-desv=0
-IQ=0
-
-contador_csvs=0
+contador_csvs = 0
 
 nuevo_archivo_detectado = False
 
-directorio_actual = os.getcwd()
-print(directorio_actual)
+# Getting current directory
+current_directory = os.getcwd()
+print(current_directory)
 
-
-# Ruta para coger los datos
-pathDL = directorio_actual + '/Rotura/Simulacion'  # 20EKIB03_CTS20D03
-# Tras tratar los datos ruta donde guardar los csv normalizados (se puede no guardar)
-ruta_csvN = directorio_actual + '/Rotura/Normalizados'
-ruta_modelo = directorio_actual + "/Rotura/Modelo"
+# Path to get the data
+pathDL = current_directory + '/Rotura/Simulacion'
+# Path to save the normalized CSV files (optional)
+ruta_csvN = current_directory + '/Rotura/Normalizados'
+ruta_modelo = current_directory + "/Rotura/Modelo"
 
 nombre = 3
 nombreEnsayo = str(nombre)
-#ruta_modelo = ruta + "/" + "RFR_Modelo_entrenado.pkl"
 
-# Crear las carpetas si no existen
+# Creating directories if they don't exist
 if not os.path.exists(pathDL):
     os.makedirs(pathDL)
 
 if not os.path.exists(ruta_csvN):
     os.makedirs(ruta_csvN)
 
-
-
+# Guide wear
 desgaste_guia = True
 
-
-
+# Colors for plotting
 colores = ['limegreen', 'teal', 'orange', 'gold', 'navy']
-################################################################
-# Esta seccion es decesaria para evitar errores o avisos
+
+# Necessary section to avoid warnings or errors
 pd.options.mode.chained_assignment = None  # default='warn'
 sns.set_style("whitegrid")
 plt.rcParams["font.family"] = "serif"
