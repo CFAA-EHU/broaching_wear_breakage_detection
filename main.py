@@ -15,6 +15,12 @@ from matplotlib import pyplot as plt
 # Initializing Flask app
 app = Flask(__name__)
 
+# Uncomment this lines for doing simulation
+#teeth_number = 42
+#first_tooth_position = 915
+#step = 10
+#Disk_Width = 40
+
 # User-input data
 teeth_number = 0
 first_tooth_position = 0
@@ -80,7 +86,6 @@ plt.rc('font', **font)
 plt.rcParams["font.serif"] = ["Times New Roman"]
 
 
-################################################################################################################################
 ################################################### Data input ################################################################
 # Data Import
 def Import(pathDL):
@@ -97,30 +102,28 @@ def Import(pathDL):
 
 # Same data format: To check if any changes occur when storing data in the datalogger.
 def MismoFormato(DLlist, ruta_csvN, nombre):
-    # Para modificar el csv y que tenga el mismo aspecto que los de entrenamiento cambio los titulos de columnas y meto un contador en la primera columna
+    # Modifying the CSV to have the same appearance as the training ones by changing column titles and adding a counter in the first column
     Titulo_columna = ['', 'Time', 'V.A.POS.C', 'A.POS.Z', 'V.PLC.R[201]', 'V.PLC.R[202]', 'V.PLC.R[203]',
                       'V.PLC.R[204]', 'V.PLC.R[205]', 'V.PLC.R[206]', 'V.PLC.R[207]', 'V.PLC.R[208]', 'V.PLC.R[209]',
                       'V.PLC.R[210]', 'V.PLC.R[211]', 'V.PLC.R[212]', 'V.A.FEED.Z', 'V.A.FEED.Z1', 'A.ACCEL.Z',
                       'A.ACCEL.Z1']
     for i in range(len(DLlist)):
-        # Obtener el DataFrame DLlist[i]
+        # Get the DataFrame DLlist[i]
         df = DLlist[i]
-        # Obtener el número de instancias en el DataFrame
+        # Get the number of instances in the DataFrame
         num_instancias = len(df)
-        # Insertar la columna con números del 1 al número de instancias
+        # Insert the column with numbers from 1 to the number of instances
         df.insert(0, ' ', range(0, num_instancias))
-        ##################
-        #################
         df = df.rename(columns=dict(zip(df.columns, Titulo_columna)))
         DLlist[i] = df
         num = str(i)
         df.to_csv(ruta_csvN + '/' + str(nombre) + num + '.csv',
-                  index=False)  # Guardo los nuevos CSV, este paso se podria quitar
+                  index=False)   # Save the new CSVs, this step could be skipped
     return (DLlist)
 
 
-##### TRATAMIENTO DE DATOS IÑIGO
-# Al tener ya los datos en el mismo formato usamos el mismo tratamiento
+##### DATA PROCESSING
+# Since the data is already in the same format, we use the same processing
 
 def Tratamiento(DLlist):
     for i in range(len(DLlist)):  # Cleans double data
@@ -140,9 +143,17 @@ def Tratamiento(DLlist):
 
 
 
-################################################################################################################################
 ################################################### General Plots ###############################################################
+
 # Torque signal of each stroke
+#Plot the torque signal of each stroke.
+#Parameters:
+#    label (str): Label for the plot.
+#    dfbroach (DataFrame): DataFrame containing the torque signal data.
+#    MediaEstable (float): Global average torque value.
+#    nombre (str): Name of the plot.
+#    y_max (float): Maximum torque value.
+#    y_min (float): Minimum torque value.
 def FigTorque(label, dfbroach, MediaEstable, nombre, y_max, y_min):
     fig = plt.figure(figsize=(9, 5))
     ax = fig.add_subplot()
@@ -204,7 +215,6 @@ def AnalisisTorqueViolin(DLlist_MT, Pasadas, zES, zEI, ylim_max, ylim_min, nombr
     #plt.show()
 
 
-####################################################################################################################
 ############################################### ANALYSIS OF BREAKAGE OR WEAR #########################################
 # Breakage
 def AnalisisRotura(DLlist_MT, valor, nombre, y_min, y_max):
