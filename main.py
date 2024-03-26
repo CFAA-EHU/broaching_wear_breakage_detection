@@ -514,16 +514,18 @@ def Estatis(DLlist_MT, valores, zES, zEI, nombre):
 
 
 
-
 @app.route('/')
 def hello_world():
+    # Render the HTML template when accessing the root URL
     return render_template('index3.html')
 
 
 @app.route('/guardar_datos', methods=['POST'])
 def guardar_datos():
+    # Obtain JSON data from the request
     data = request.get_json()
 
+    # Declare global variables to store the input data
     global teeth_number
     global first_tooth_position
     global step
@@ -534,29 +536,23 @@ def guardar_datos():
     global zES
     global zBS
 
-
-
+    # Extract data from JSON and assign it to global variables
     teeth_number = data.get('texto1')
     first_tooth_position = data.get('texto2')
     step = data.get('texto3')
     Disk_Width = data.get('texto4')
     material = data.get('texto5')
 
-    #print(teeth_number)
-    #print(first_tooth_position)
-    #print(step)
-    #print(Disk_Width)
-
-
-    # Marca especifico las zonas
+    # Mark specific zones
     Transition = int(Disk_Width) / int(step) + NumSeg
     zBI = int(first_tooth_position)
     zEI = int(first_tooth_position) + (Transition * int(step))
     zES = int(first_tooth_position) + (int(teeth_number) - Transition) * int(step)
     zBS = int(first_tooth_position) + int(teeth_number) * int(step)
 
+    # Return a JSON response indicating successful data storage
+    return jsonify({'message': 'Data saved successfully'})
 
-    return jsonify({'mensaje': 'Datos guardados con éxito'})
 
 
 
