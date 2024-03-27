@@ -29,4 +29,4 @@ Poner la app en marcha:
 - Empezar con la simulación manual, copiar **uno a uno** en orden un csv de la carpeta _/Rotura_ a la carpeta _/Rotura/Simulacion_ (ir haciendo esto con cada csv).
 - La aplicación mostrará gradualmente el desgaste en cada pasada y detectará si ocurre una rotura.
 
-If you are planning to reuse this code, please cite us as: CFAA-EHU (2024). Broaching wear breakage detection [[Source code](https://github.com/CFAA-EHU/broaching_wear_breakage_detection)https://github.com/CFAA-EHU/broaching_wear_breakage_detection]. GitHub repository.
+If you are planning to reuse this code, please cite us as: CFAA-UPV/EHU (2023). Broaching wear breakage detection [[Source code](https://github.com/CFAA-EHU/broaching_wear_breakage_detection)]. GitHub repository.
