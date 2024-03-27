@@ -13,6 +13,8 @@ Getting the app up and running:
 - Begin the manual simulation by copying CSV files **one by one** from the _/Rotura_ folder to the _/Rotura/Simulacion_ folder (do this for each CSV file).
 - The application will gradually display the wear for each pass and detect if a breakage occurs.
 
+If you are planning to reuse this code, please cite us as: "CFAA-UPV/EHU (2023). Broaching wear breakage detection [[Source code](https://github.com/CFAA-EHU/broaching_wear_breakage_detection)]. GitHub repository."
+
 # Instrucciones para el despliegue
 
 Requisitos para desplegar la aplicación en ordenador local.
@@ -29,4 +31,4 @@ Poner la app en marcha:
 - Empezar con la simulación manual, copiar **uno a uno** en orden un csv de la carpeta _/Rotura_ a la carpeta _/Rotura/Simulacion_ (ir haciendo esto con cada csv).
 - La aplicación mostrará gradualmente el desgaste en cada pasada y detectará si ocurre una rotura.
 
-If you are planning to reuse this code, please cite us as: CFAA-UPV/EHU (2023). Broaching wear breakage detection [[Source code](https://github.com/CFAA-EHU/broaching_wear_breakage_detection)]. GitHub repository.
+Si planeas usar este código, por favor cítanos como: "CFAA-UPV/EHU (2023). Broaching wear breakage detection [[Source code](https://github.com/CFAA-EHU/broaching_wear_breakage_detection)]. GitHub repository."
